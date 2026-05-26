@@ -52,13 +52,13 @@ VITE_URL_EMPRESTIMO=http://localhost:9500
 ### 2. Instalar dependências
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3. Rodar em desenvolvimento
 
 ```bash
-pnpm dev
+npm dev
 ```
 
 A aplicação estará disponível em `http://localhost:3000`.
@@ -66,8 +66,8 @@ A aplicação estará disponível em `http://localhost:3000`.
 ### 4. Build para produção
 
 ```bash
-pnpm build
-pnpm start
+npm build
+npm start
 ```
 
 ---
@@ -178,8 +178,8 @@ client/
 
 | Comando        | Descrição                          |
 |----------------|------------------------------------|
-| `pnpm dev`     | Inicia o servidor de desenvolvimento |
-| `pnpm build`   | Gera o build de produção           |
-| `pnpm start`   | Inicia o servidor de produção      |
-| `pnpm check`   | Verifica erros de TypeScript       |
-| `pnpm format`  | Formata o código com Prettier      |
+| `npm dev`     | Inicia o servidor de desenvolvimento |
+| `npm build`   | Gera o build de produção           |
+| `npm start`   | Inicia o servidor de produção      |
+| `npm check`   | Verifica erros de TypeScript       |
+| `npm format`  | Formata o código com Prettier      |
