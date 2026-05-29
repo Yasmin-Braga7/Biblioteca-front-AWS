@@ -3,9 +3,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Plus, Calendar, AlertTriangle, Loader2, RotateCcw } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { emprestimos as api, Emprestimo } from '@/services/api';
+import {
+  emprestimos as api,
+  usuarios as apiUsuarios,
+  livros as apiLivros,
+  exemplares as apiExemplares,
+  Emprestimo,
+  Usuario,
+  Livro,
+  Exemplar,
+} from '@/services/api';
 import { toast } from 'sonner';
 
 function statusColor(s: string) {
@@ -23,6 +48,24 @@ export default function Emprestimos() {
   const [data, setData] = useState<Emprestimo[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ─── Estado do modal "Novo Empréstimo" ────────────────────────────────
+  const [modalOpen, setModalOpen] = useState(false);
+  const [usuariosList, setUsuariosList] = useState<Usuario[]>([]);
+  const [livrosList, setLivrosList] = useState<Livro[]>([]);
+  const [exemplaresList, setExemplaresList] = useState<Exemplar[]>([]);
+  const [loadingModal, setLoadingModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [selectedUsuario, setSelectedUsuario] = useState('');
+  const [selectedLivro, setSelectedLivro] = useState('');
+  const [selectedExemplar, setSelectedExemplar] = useState('');
+  const [loadingExemplares, setLoadingExemplares] = useState(false);
+
+  // ─── Estado do modal de confirmação de devolução ──────────────────────
+  const [devolverDialog, setDevolverDialog] = useState(false);
+  const [devolverTarget, setDevolverTarget] = useState<Emprestimo | null>(null);
+  const [devolvendo, setDevolvendo] = useState(false);
+
   const carregar = () => {
     setLoading(true);
     api.listar()
@@ -33,17 +76,108 @@ export default function Emprestimos() {
 
   useEffect(carregar, []);
 
-  const handleDevolver = async (e: Emprestimo) => {
+  // ─── Abrir modal e carregar usuários + livros ─────────────────────────
+  const abrirModal = async () => {
+    setModalOpen(true);
+    setLoadingModal(true);
+    setSelectedUsuario('');
+    setSelectedLivro('');
+    setSelectedExemplar('');
+    setExemplaresList([]);
+
     try {
-      await api.devolver(e.emprestimo_id);
-      setData((prev) => prev.map((x) => x.emprestimo_id === e.emprestimo_id ? { ...x, emprestimo_status: 'Devolvido' } : x));
-      toast.success('Devolução registrada!');
+      const [u, l] = await Promise.all([apiUsuarios.listar(), apiLivros.listar()]);
+      setUsuariosList(Array.isArray(u) ? u.filter((x) => x.usuario_status === 'Ativo') : []);
+      setLivrosList(Array.isArray(l) ? l.filter((x) => x.livro_status === 'Ativo') : []);
     } catch {
-      toast.error('Erro ao registrar devolução');
+      toast.error('Erro ao carregar dados para o formulário');
+    } finally {
+      setLoadingModal(false);
     }
   };
 
-  const ativos   = data.filter((e) => e.emprestimo_status === 'Ativo');
+  // ─── Ao selecionar um livro, carregar seus exemplares disponíveis ─────
+  const handleLivroChange = async (livroId: string) => {
+    setSelectedLivro(livroId);
+    setSelectedExemplar('');
+    setExemplaresList([]);
+
+    if (!livroId) return;
+
+    setLoadingExemplares(true);
+    try {
+      const ex = await apiExemplares.listarPorLivro(Number(livroId));
+      setExemplaresList(
+        Array.isArray(ex) ? ex.filter((e) => e.exemplar_status === 'Disponivel') : [],
+      );
+    } catch {
+      toast.error('Erro ao carregar exemplares');
+    } finally {
+      setLoadingExemplares(false);
+    }
+  };
+
+  // ─── Criar empréstimo ─────────────────────────────────────────────────
+  const handleCriar = async () => {
+    if (!selectedUsuario || !selectedLivro || !selectedExemplar) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const novo = await api.criar({
+        usuario_id: Number(selectedUsuario),
+        livro_id: Number(selectedLivro),
+        exemplar_id: Number(selectedExemplar),
+      });
+      // Adiciona o novo empréstimo ao estado local
+      const usuarioSel = usuariosList.find((u) => u.usuario_id === Number(selectedUsuario));
+      const livroSel = livrosList.find((l) => l.livro_id === Number(selectedLivro));
+      const emprestimoCriado: Emprestimo = {
+        ...novo,
+        emprestimo_status: novo.emprestimo_status ?? 'Ativo',
+        usuario: usuarioSel ? { usuario_nome: usuarioSel.usuario_nome } : undefined,
+        livro: livroSel ? { livro_titulo: livroSel.livro_titulo } : undefined,
+      };
+      setData((prev) => [emprestimoCriado, ...prev]);
+      setModalOpen(false);
+      toast.success('Empréstimo criado com sucesso!');
+    } catch {
+      toast.error('Erro ao criar empréstimo');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ─── Confirmação de devolução ─────────────────────────────────────────
+  const pedirDevolucao = (e: Emprestimo) => {
+    setDevolverTarget(e);
+    setDevolverDialog(true);
+  };
+
+  const confirmarDevolucao = async () => {
+    if (!devolverTarget) return;
+    setDevolvendo(true);
+    try {
+      await api.devolver(devolverTarget.emprestimo_id);
+      setData((prev) =>
+        prev.map((x) =>
+          x.emprestimo_id === devolverTarget.emprestimo_id
+            ? { ...x, emprestimo_status: 'Devolvido' }
+            : x,
+        ),
+      );
+      toast.success('Devolução registrada!');
+      setDevolverDialog(false);
+    } catch {
+      toast.error('Erro ao registrar devolução');
+    } finally {
+      setDevolvendo(false);
+    }
+  };
+
+  const ativos = data.filter((e) => e.emprestimo_status === 'Ativo');
   const atrasados = data.filter((e) => e.emprestimo_status === 'Atrasado');
   const multaTotal = atrasados.reduce((acc, e) => acc + (e.emprestimo_multa_valor ?? 0), 0);
 
@@ -79,7 +213,7 @@ export default function Emprestimos() {
               </td>
               <td className="py-4 px-4 text-right">
                 {e.emprestimo_status !== 'Devolvido' && (
-                  <Button variant="outline" size="sm" onClick={() => handleDevolver(e)}>
+                  <Button variant="outline" size="sm" onClick={() => pedirDevolucao(e)}>
                     <RotateCcw className="w-3 h-3 mr-1" /> Devolver
                   </Button>
                 )}
@@ -99,7 +233,10 @@ export default function Emprestimos() {
             <h1 className="text-4xl font-bold text-foreground mb-2">Empréstimos</h1>
             <p className="text-muted-foreground">Gerenciar empréstimos e devoluções</p>
           </div>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={abrirModal}
+          >
             <Plus className="w-4 h-4 mr-2" /> Novo Empréstimo
           </Button>
         </div>
@@ -137,6 +274,145 @@ export default function Emprestimos() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ─── Modal: Novo Empréstimo ─────────────────────────────────────── */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo Empréstimo</DialogTitle>
+            <DialogDescription>
+              Selecione o usuário, livro e exemplar para registrar um novo empréstimo.
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingModal ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              {/* Usuário */}
+              <div className="space-y-2">
+                <Label htmlFor="select-usuario">Usuário</Label>
+                <Select value={selectedUsuario} onValueChange={setSelectedUsuario}>
+                  <SelectTrigger id="select-usuario" className="w-full">
+                    <SelectValue placeholder="Selecione um usuário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usuariosList.length === 0 ? (
+                      <SelectItem value="_empty" disabled>
+                        Nenhum usuário ativo encontrado
+                      </SelectItem>
+                    ) : (
+                      usuariosList.map((u) => (
+                        <SelectItem key={u.usuario_id} value={String(u.usuario_id)}>
+                          {u.usuario_nome} — {u.usuario_email}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Livro */}
+              <div className="space-y-2">
+                <Label htmlFor="select-livro">Livro</Label>
+                <Select value={selectedLivro} onValueChange={handleLivroChange}>
+                  <SelectTrigger id="select-livro" className="w-full">
+                    <SelectValue placeholder="Selecione um livro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {livrosList.length === 0 ? (
+                      <SelectItem value="_empty" disabled>
+                        Nenhum livro ativo encontrado
+                      </SelectItem>
+                    ) : (
+                      livrosList.map((l) => (
+                        <SelectItem key={l.livro_id} value={String(l.livro_id)}>
+                          {l.livro_titulo}
+                          {l.autor?.autor_nome ? ` — ${l.autor.autor_nome}` : ''}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Exemplar */}
+              <div className="space-y-2">
+                <Label htmlFor="select-exemplar">Exemplar</Label>
+                <Select
+                  value={selectedExemplar}
+                  onValueChange={setSelectedExemplar}
+                  disabled={!selectedLivro || loadingExemplares}
+                >
+                  <SelectTrigger id="select-exemplar" className="w-full">
+                    <SelectValue
+                      placeholder={
+                        loadingExemplares
+                          ? 'Carregando exemplares...'
+                          : !selectedLivro
+                            ? 'Selecione um livro primeiro'
+                            : 'Selecione um exemplar'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {exemplaresList.length === 0 ? (
+                      <SelectItem value="_empty" disabled>
+                        Nenhum exemplar disponível
+                      </SelectItem>
+                    ) : (
+                      exemplaresList.map((ex) => (
+                        <SelectItem key={ex.exemplar_id} value={String(ex.exemplar_id)}>
+                          Cód. {ex.exemplar_codigo_barras} (#{ex.exemplar_id})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModalOpen(false)} disabled={submitting}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCriar}
+              disabled={submitting || !selectedUsuario || !selectedLivro || !selectedExemplar}
+            >
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Registrar Empréstimo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Modal: Confirmar Devolução ─────────────────────────────────── */}
+      <Dialog open={devolverDialog} onOpenChange={setDevolverDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirmar Devolução</DialogTitle>
+            <DialogDescription>
+              Deseja registrar a devolução do livro{' '}
+              <strong>{devolverTarget?.livro?.livro_titulo ?? `#${devolverTarget?.livro_id}`}</strong>{' '}
+              emprestado para{' '}
+              <strong>{devolverTarget?.usuario?.usuario_nome ?? `ID ${devolverTarget?.usuario_id}`}</strong>?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDevolverDialog(false)} disabled={devolvendo}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmarDevolucao} disabled={devolvendo}>
+              {devolvendo && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Confirmar Devolução
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
