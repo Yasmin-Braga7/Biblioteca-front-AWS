@@ -3,7 +3,10 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Em produção (build), os assets precisam do prefixo da URL pública.
+  // Em dev, usa '/' normal para o servidor local funcionar.
+  base: command === 'build' ? '/20261prj5/biblioteca/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -36,4 +39,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
