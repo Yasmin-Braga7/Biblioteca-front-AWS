@@ -82,7 +82,7 @@ export default function Relatorios() {
               {cards.map((c) => {
                 const Icon = c.icon;
                 return (
-                  <Card key={c.label} className="border border-border">
+                  <Card key={c.label} className="card-premium">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-muted-foreground">{c.label}</CardTitle>
                       <div className={c.color}><Icon className="w-5 h-5" /></div>
@@ -96,7 +96,7 @@ export default function Relatorios() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border border-border">
+              <Card className="card-premium">
                 <CardHeader><CardTitle>Top Livros Lidos</CardTitle></CardHeader>
                 <CardContent>
                   {topLivros.length === 0 ? (
@@ -117,7 +117,7 @@ export default function Relatorios() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-border">
+              <Card className="card-premium">
                 <CardHeader><CardTitle>Usuários Inadimplentes</CardTitle></CardHeader>
                 <CardContent>
                   {inadimplentes.length === 0 ? (

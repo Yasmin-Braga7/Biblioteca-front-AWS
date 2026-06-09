@@ -58,7 +58,7 @@ export default function Reservas() {
             { label: 'Ativas', value: ativas, icon: CheckCircle },
             { label: 'Pendentes/Expiradas', value: pendentes, icon: Clock },
           ].map(({ label, value, icon: Icon }) => (
-            <Card key={label} className="border border-border">
+            <Card key={label} className="card-premium">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Icon className="w-4 h-4" />{label}
@@ -71,7 +71,7 @@ export default function Reservas() {
           ))}
         </div>
 
-        <Card className="border border-border">
+        <Card className="card-premium">
           <CardHeader><CardTitle>Lista de Reservas</CardTitle></CardHeader>
           <CardContent>
             {loading ? (

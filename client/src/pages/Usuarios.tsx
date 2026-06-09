@@ -164,7 +164,7 @@ export default function Usuarios() {
             { label: 'Inativos', value: inativos, icon: <UserX className="w-5 h-5" />, color: 'text-orange-500' },
             { label: 'Bibliotecários', value: bibliotecarios, icon: <Shield className="w-5 h-5" />, color: 'text-purple-600' },
           ].map((s) => (
-            <Card key={s.label} className="border border-border">
+            <Card key={s.label} className="card-premium">
               <CardContent className="pt-5 flex items-center gap-4">
                 <div className={`${s.color} opacity-80`}>{s.icon}</div>
                 <div>
@@ -188,7 +188,7 @@ export default function Usuarios() {
         </div>
 
         {/* Table */}
-        <Card className="border border-border">
+        <Card className="card-premium">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Lista de Usuários</CardTitle>
           </CardHeader>

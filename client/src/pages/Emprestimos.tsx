@@ -267,14 +267,14 @@ export default function Emprestimos() {
             { label: 'Atrasados', value: loading ? '—' : atrasados.length, color: 'text-red-600' },
             { label: 'Multas Pendentes', value: loading ? '—' : `R$ ${multaTotal.toFixed(2).replace('.', ',')}`, color: 'text-orange-600' },
           ].map((s) => (
-            <Card key={s.label} className="border border-border">
+            <Card key={s.label} className="card-premium">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle></CardHeader>
               <CardContent><div className={`text-3xl font-bold ${s.color || 'text-foreground'}`}>{s.value}</div></CardContent>
             </Card>
           ))}
         </div>
 
-        <Card className="border border-border">
+        <Card className="card-premium">
           <CardHeader><CardTitle>Histórico de Empréstimos</CardTitle></CardHeader>
           <CardContent>
             {loading ? (
