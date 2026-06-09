@@ -98,7 +98,7 @@ export default function Dashboard() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat) => (
-                <Card key={stat.title} className="border border-border">
+                <Card key={stat.title} className="card-premium">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
                     <div className={stat.color}>{stat.icon}</div>
@@ -111,7 +111,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 border border-border">
+              <Card className="lg:col-span-2 card-premium">
                 <CardHeader>
                   <CardTitle>Atividade Recente</CardTitle>
                 </CardHeader>
@@ -134,7 +134,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-border">
+              <Card className="card-premium">
                 <CardHeader>
                   <CardTitle>Status dos Microsserviços</CardTitle>
                 </CardHeader>

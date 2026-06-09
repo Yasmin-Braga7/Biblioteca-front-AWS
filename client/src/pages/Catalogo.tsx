@@ -76,7 +76,7 @@ export default function Catalogo() {
           <Input placeholder="Buscar por título ou autor..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
-        <Card className="border border-border">
+        <Card className="card-premium">
           <CardHeader>
             <CardTitle>Livros Cadastrados {!loading && <span className="text-sm font-normal text-muted-foreground ml-2">({filtered.length})</span>}</CardTitle>
           </CardHeader>
