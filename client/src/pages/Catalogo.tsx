@@ -104,11 +104,30 @@ export default function Catalogo() {
                       ? livro.generos.map((g) => g.genero.nome).join(', ')
                       : '—';
 
+                    // A URL aponta para GET /livros/:id/capa — o backend retorna os bytes da imagem
+                    const capaUrl = livro.imagemNome ? livros.getCapaUrl(livro.id) : null;
+
                     return (
                       <tr key={livro.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-4">
-                          <p className="font-bold text-slate-800 dark:text-slate-100 text-base">{livro.titulo}</p>
-                          <p className="text-slate-500 dark:text-slate-400">{autorNome}</p>
+                          <div className="flex items-center gap-3">
+                            {capaUrl ? (
+                              <img
+                                src={capaUrl}
+                                alt={`Capa de ${livro.titulo}`}
+                                className="w-9 h-12 object-cover rounded shadow-sm flex-shrink-0"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <div className="w-9 h-12 rounded bg-slate-100 dark:bg-slate-700 flex-shrink-0 flex items-center justify-center text-slate-300 dark:text-slate-600 text-xs">
+                                📖
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-bold text-slate-800 dark:text-slate-100 text-base">{livro.titulo}</p>
+                              <p className="text-slate-500 dark:text-slate-400">{autorNome}</p>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{generoNome}</td>
                         <td className="px-6 py-4 text-center text-slate-700 dark:text-slate-300 font-medium">
@@ -116,11 +135,10 @@ export default function Catalogo() {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                              livro.status === 1
+                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${livro.status === 1
                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                 : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                            }`}
+                              }`}
                           >
                             {livro.status === 1 ? 'Ativo' : 'Inativo'}
                           </span>

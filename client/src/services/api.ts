@@ -78,6 +78,9 @@ export interface Livro {
   numeroPaginas?: number;
   idioma?: string;
   status?: number;
+  imagem?: Buffer | null;
+  extensao?: string | null;
+  imagemNome?: string | null;
   autores?: { autor: Autor }[];
   generos?: { genero: Genero }[];
   exemplares?: Exemplar[];
@@ -258,6 +261,20 @@ export const livros = {
   alterarStatus: async (id: number, status: number) => {
     const { data } = await clientCatalogo.patch(`/livros/${id}/status`, { status });
     return data.data ?? data;
+  },
+  // Retorna a URL pública da capa para uso em <img src="...">
+  getCapaUrl: (id: number): string => {
+    return `${BASE.catalogo}/livros/${id}/capa`;
+  },
+  uploadCapa: async (id: number, arquivo: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('file', arquivo);
+    await clientCatalogo.post(`/livros/${id}/capa`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deletarCapa: async (id: number): Promise<void> => {
+    await clientCatalogo.delete(`/livros/${id}/capa`);
   },
 };
 
