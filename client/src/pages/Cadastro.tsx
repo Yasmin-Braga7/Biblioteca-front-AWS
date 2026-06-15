@@ -1,8 +1,22 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usuarios as api } from '@/services/api';
+
+const TOTAL_LIVROS = 350;
+
+const PALETA_CORES_VELHAS = [
+  'bg-[#3e2723]', 'bg-[#2c3e50]', 'bg-[#2d3e2d]', 'bg-[#800020]', 
+  'bg-[#5d4037]', 'bg-[#1a1a1a]', 'bg-[#795548]', 'bg-[#37474f]',
+];
+
+const ALTURAS = ['h-24', 'h-28', 'h-32', 'h-36', 'h-40', 'h-44'];
+const LARGURAS = [
+  'min-w-[20px] max-w-[26px]', 'min-w-[26px] max-w-[36px]', 
+  'min-w-[36px] max-w-[50px]', 'min-w-[50px] max-w-[66px]', 
+  'min-w-[66px] max-w-[80px]',
+];
 
 export default function Cadastro() {
   const [, navigate] = useLocation();
@@ -11,21 +25,24 @@ export default function Cadastro() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Geração de dados idêntica ao Login
+  const paredeDeLivrosData = useMemo(() => {
+    return Array.from({ length: TOTAL_LIVROS }, (_, i) => ({
+      id: i,
+      cor: PALETA_CORES_VELHAS[Math.floor(Math.random() * PALETA_CORES_VELHAS.length)],
+      altura: ALTURAS[Math.floor(Math.random() * ALTURAS.length)],
+      largura: LARGURAS[Math.floor(Math.random() * LARGURAS.length)],
+      estilo: Math.floor(Math.random() * 5),
+      desgaste: Math.random() > 0.5,
+    }));
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Usamos ': any' para o TypeScript aceitar as chaves mapeadas que o back-end exige
-      const payload: any = {
-        nome: nome,
-        email: email,
-        senha: senha,
-        tipo: 'Leitor',
-        status: 'Ativo'
-      };
-
-      await api.criar(payload);
-      toast.success('Conta criada com sucesso! Faça login para continuar.');
+      await api.criar({ nome, email, senha, tipo: 'Leitor', status: 'Ativo' });
+      toast.success('Conta criada com sucesso!');
       navigate('/login');
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Erro ao criar conta');
@@ -35,78 +52,51 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f0f1a] p-4 transition-colors duration-300">
-      <div className="w-full max-w-md bg-white dark:bg-[#1a1a2e] rounded-2xl shadow-xl overflow-hidden border border-slate-100 dark:border-slate-700 page-enter">
-        <div className="bg-primary p-8 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-[#1a0f0a]">
+      {/* ─── PAREDE DE LIVROS (IGUAL AO LOGIN) ─── */}
+      <div className="absolute inset-0 z-0 flex flex-wrap content-start items-end bg-[#251610] opacity-90">
+        {paredeDeLivrosData.map((livro) => (
+          <div key={livro.id} className={`relative flex-grow ${livro.largura} ${livro.altura} group cursor-pointer border-b-[16px] border-[#1a0f0a] shadow-inner`}>
+            <div className="absolute inset-0 bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.03] pointer-events-none" />
+            <div className={`absolute bottom-0 w-full h-full ${livro.cor} rounded-t-[3px] origin-bottom flex flex-col justify-evenly items-center border-l border-black/40 border-r border-black/20 shadow-[inset_6px_0_8px_rgba(0,0,0,0.6),inset_-3px_0_5px_rgba(0,0,0,0.4),3px_0_6px_rgba(0,0,0,0.7)] transition-transform duration-300 ease-out group-hover:-translate-y-6 group-hover:scale-[1.08] group-hover:z-50 z-10`}>
+              <div className={`absolute inset-0 bg-black/10 rounded-t-[3px] ${livro.desgaste ? 'opacity-30' : 'opacity-10'}`} />
+              {/* Estilos decorativos */}
+              {livro.estilo === 0 && <div className="w-full h-[2px] bg-amber-950/60 z-20" />}
+              {livro.estilo === 4 && <div className="w-2/3 h-5 bg-[#f4ecd8]/80 rounded-[1px] z-20" />}
+            </div>
+          </div>
+        ))}
+        <div className="absolute inset-0 z-20 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(15,8,5,0.9)_100%)] pointer-events-none" />
+      </div>
+
+      {/* ─── FORMULÁRIO (ESTRUTURA DE LOGIN) ─── */}
+      <div className="relative z-30 w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7)] overflow-hidden border border-white/30">
+        <div className="bg-primary p-8 text-center border-b border-black/5">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md shadow-inner ring-2 ring-white/40">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Criar Conta</h1>
-          <p className="text-primary-foreground/80 text-sm">Junte-se à Biblioteca</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Cadastro</h1>
         </div>
-
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="sgb-label">Nome Completo</label>
-              <input
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-                autoFocus
-                placeholder="Seu nome"
-                className="sgb-input"
-              />
+              <label className="text-slate-700 dark:text-slate-300 font-bold">Nome</label>
+              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required className="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200" />
             </div>
-
             <div>
-              <label className="sgb-label">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="seu@email.com"
-                className="sgb-input"
-              />
+              <label className="text-slate-700 dark:text-slate-300 font-bold">Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200" />
             </div>
-
             <div>
-              <label className="sgb-label">Senha</label>
-              <input
-                type="password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-                minLength={6}
-                placeholder="••••••••"
-                className="sgb-input"
-              />
+              <label className="text-slate-700 dark:text-slate-300 font-bold">Senha</label>
+              <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required className="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200" />
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="sgb-btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Criando...
-                </>
-              ) : (
-                'Cadastrar'
-              )}
+            <button type="submit" disabled={loading} className="w-full py-3.5 bg-primary text-white rounded-lg font-bold hover:shadow-lg transition-all">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Criar Conta'}
             </button>
-            
             <div className="text-center mt-4">
-              <button
-                type="button"
-                onClick={() => navigate('/login')}
-                className="text-sm text-slate-500 hover:text-primary transition-colors"
-              >
-                Já tem uma conta? Faça login
+              <button type="button" onClick={() => navigate('/login')} className="text-sm font-bold text-slate-500 hover:text-primary">
+                Já tem uma conta? <span className="text-primary">Faça login</span>
               </button>
             </div>
           </form>
