@@ -84,6 +84,7 @@ export interface Livro {
   autores?: { autor: Autor }[];
   generos?: { genero: Genero }[];
   exemplares?: Exemplar[];
+  _count?: { exemplares: number };
 }
 
 export interface CriarLivroPayload {
