@@ -202,9 +202,42 @@ export default function Emprestimos() {
   return (
     <DashboardLayout>
       <div className="space-y-6 page-enter">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-4">
-          {isAdmin ? 'Gestão de Empréstimos e Devoluções' : 'Meus Empréstimos'}
-        </h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+            {isAdmin ? 'Gestão de Empréstimos e Devoluções' : 'Meus Empréstimos'}
+          </h1>
+        </div>
+
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-bottom-2 duration-500">
+          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-emerald-500">
+            <div className="p-3 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg shadow-sm">
+              <RotateCcw className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">No Prazo</p>
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{ativos.length}</h3>
+            </div>
+          </div>
+          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-rose-500">
+            <div className="p-3 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg shadow-sm">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Atrasados</p>
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{atrasados.length}</h3>
+            </div>
+          </div>
+          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-blue-500">
+            <div className="p-3 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg shadow-sm">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Histórico</p>
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{emprestimosVisiveis.length}</h3>
+            </div>
+          </div>
+        </div>
 
         {/* Tabs - Escondidas para o Leitor */}
         {isAdmin && (
@@ -234,39 +267,48 @@ export default function Emprestimos() {
 
         {/* Tab: Nova Retirada (Apenas Admin) */}
         {activeTab === 'novo' && isAdmin && (
-          <div className="glass-card p-6 max-w-2xl">
-            <div className="space-y-6">
-              <div>
-                <label className="sgb-label">Buscar Usuário</label>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Clique em 'Novo Empréstimo' para buscar..." className="sgb-input" disabled />
-                  <button onClick={abrirModal} className="sgb-btn-primary whitespace-nowrap flex items-center gap-2 shrink-0">
-                    <Plus className="w-4 h-4" />
-                    Novo Empréstimo
-                  </button>
-                </div>
+          <div className="glass-card p-8 w-full animate-in zoom-in-95 duration-300">
+            <div className="flex flex-col items-center text-center space-y-6 py-12">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner mb-2 ring-1 ring-primary/20">
+                <Plus className="w-12 h-12" />
               </div>
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                  Registrar Novo Empréstimo
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg">
+                  Inicie o processo de retirada selecionando um leitor e um livro disponível no catálogo.
+                </p>
+              </div>
+              <button 
+                onClick={abrirModal} 
+                className="sgb-btn-primary mt-4 px-8 py-4 text-lg font-semibold flex items-center gap-3 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1 rounded-xl"
+              >
+                <Plus className="w-6 h-6" />
+                Iniciar Empréstimo
+              </button>
             </div>
           </div>
         )}
 
         {/* Tab: Devoluções / Lista de Empréstimos */}
         {activeTab === 'ativos' && (
-          <div className="glass-card overflow-hidden">
+          <div className="glass-card overflow-hidden animate-in slide-in-from-right-4 duration-300">
             {loading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 uppercase">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
                   <tr>
-                    <th className="px-6 py-4">Livro</th>
-                    {isAdmin && <th className="px-6 py-4">Leitor</th>}
-                    <th className="px-6 py-4">Prazo</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Multa</th>
-                    {isAdmin && <th className="px-6 py-4">Ações</th>}
+                    <th className="px-6 py-5 font-semibold">Livro</th>
+                    {isAdmin && <th className="px-6 py-5 font-semibold">Leitor</th>}
+                    <th className="px-6 py-5 font-semibold">Prazo</th>
+                    <th className="px-6 py-5 font-semibold">Status</th>
+                    <th className="px-6 py-5 font-semibold">Multa</th>
+                    {isAdmin && <th className="px-6 py-5 font-semibold text-right">Ações</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -314,12 +356,12 @@ export default function Emprestimos() {
                           )}
                         </td>
                         {isAdmin && (
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => pedirDevolucao(e)}
-                              className="text-primary hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300 font-bold flex items-center gap-1 text-sm"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 dark:bg-slate-800 dark:hover:bg-rose-900/40 dark:text-slate-300 dark:hover:text-rose-400 font-medium rounded-lg transition-all"
                             >
-                              <RotateCcw className="w-3.5 h-3.5" />
+                              <RotateCcw className="w-4 h-4" />
                               Processar
                             </button>
                           </td>
@@ -329,6 +371,7 @@ export default function Emprestimos() {
                   )}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         )}
