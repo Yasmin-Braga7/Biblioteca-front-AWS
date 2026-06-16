@@ -263,6 +263,10 @@ export const livros = {
     const { data } = await clientCatalogo.patch(`/livros/${id}/status`, { status });
     return data.data ?? data;
   },
+  editar: async (id: number, payload: CriarLivroPayload) => {
+    const { data } = await clientCatalogo.put(`/livros/${id}`, payload);
+    return data.data ?? data;
+  },
   // Retorna a URL pública da capa para uso em <img src="...">
   getCapaUrl: (id: number): string => {
     return `${BASE.catalogo}/livros/${id}/capa`;

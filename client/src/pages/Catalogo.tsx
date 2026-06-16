@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Loader2, Eye, UserPlus, Tags } from 'lucide-react';
+import { Search, Plus, Loader2, Eye, UserPlus, Tags, Pencil } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { livros, Livro } from '@/services/api';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import FormNovoLivro from '@/components/ui/FormNovoLivro';
 import DetalhesLivro from '@/components/ui/DetalhesLivro';
 import FormNovoAutor from '@/components/ui/FormNovoAutor';
 import FormNovoGenero from '@/components/ui/FormNovoGenero';
+import FormEditarLivro from '@/components/ui/FormEditarLivro';
 
 export default function Catalogo() {
   const [data, setData] = useState<Livro[]>([]);
@@ -19,6 +20,8 @@ export default function Catalogo() {
   const [dialogGenero, setDialogGenero] = useState(false);
   const [livroSelecionado, setLivroSelecionado] = useState<Livro | null>(null);
   const [detalhesAberto, setDetalhesAberto] = useState(false);
+  const [editarAberto, setEditarAberto] = useState(false);
+  const [livroParaEditar, setLivroParaEditar] = useState<Livro | null>(null);
 
   const abrirDetalhes = (livro: Livro) => {
     setLivroSelecionado(livro);
@@ -181,12 +184,24 @@ export default function Catalogo() {
                           </button>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleAlterarStatus(livro); }}
-                            className="text-primary hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300 font-medium text-sm transition-colors"
-                          >
-                            {livro.status === 1 ? 'Desativar' : 'Ativar'}
-                          </button>
+                          <div className="flex items-center justify-end gap-3">
+                            {isAdmin && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setLivroParaEditar(livro); setEditarAberto(true); }}
+                                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors"
+                                title="Editar livro"
+                              >
+                                <Pencil className="w-4 h-4" />
+                                Editar
+                              </button>
+                            )}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleAlterarStatus(livro); }}
+                              className="text-primary hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300 font-medium text-sm transition-colors"
+                            >
+                              {livro.status === 1 ? 'Desativar' : 'Ativar'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -223,6 +238,16 @@ export default function Catalogo() {
         open={detalhesAberto}
         onOpenChange={setDetalhesAberto}
       />
+
+      {/* Modal de Editar Livro */}
+      {livroParaEditar && (
+        <FormEditarLivro
+          livro={livroParaEditar}
+          open={editarAberto}
+          onOpenChange={(v) => { setEditarAberto(v); if (!v) setLivroParaEditar(null); }}
+          onSucesso={carregarLivros}
+        />
+      )}
     </DashboardLayout>
   );
 }

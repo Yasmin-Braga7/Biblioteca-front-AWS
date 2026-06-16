@@ -24,6 +24,7 @@ interface KpiData {
 interface AtividadeRecente {
   id: number;
   descricao: string;
+  subtitulo: string;
   hora: string;
 }
 
@@ -78,12 +79,29 @@ export default function Dashboard() {
             { name: 'Mar', emprestimos: 0 },
           ]);
 
-          // Recent activity
-          const recentes = emprestimosData.value.slice(0, 5).map((e) => {
+          // Recent activity — resolve names from the already fetched lists
+          const empList = emprestimosData.value;
+          const usuariosMap = new Map<number, string>();
+          const livrosMap = new Map<number, string>();
+          const exemplarToLivroMap = new Map<number, string>(); // exemplar_id → livro titulo
+
+          if (usuariosData.status === 'fulfilled') {
+            usuariosData.value.forEach((u) => usuariosMap.set(u.usuario_id, u.usuario_nome));
+          }
+          if (livrosData.status === 'fulfilled') {
+            livrosData.value.forEach((l) => {
+              livrosMap.set(l.id, l.titulo);
+              // Monta mapa reverso: cada exemplar aponta para o título do livro
+              if (l.exemplares) {
+                l.exemplares.forEach((ex) => exemplarToLivroMap.set(ex.id, l.titulo));
+              }
+            });
+          }
+
+          const recentes = empList.slice(0, 5).map((e) => {
             let horaStr = '—';
             if (e.emprestimo_data_emprestimo) {
               const d = new Date(e.emprestimo_data_emprestimo);
-              // O banco retorna sempre meia-noite UTC para colunas do tipo Date
               const anoEmp = d.getUTCFullYear();
               const mesEmp = d.getUTCMonth();
               const diaEmp = d.getUTCDate();
@@ -105,9 +123,31 @@ export default function Dashboard() {
                 else if (diffDay > 1) horaStr = `há ${diffDay} dias`;
               }
             }
+
+            // Resolve nome do usuário
+            const nomeUsuario = e.usuario?.usuario_nome
+              || usuariosMap.get(e.usuario_id)
+              || `Usuário ${e.usuario_id}`;
+
+            // Resolve título do livro: objeto aninhado → livro_id → exemplar → itens
+            let tituloLivro = e.livro?.livro_titulo || '';
+            if (!tituloLivro && e.livro_id) {
+              tituloLivro = livrosMap.get(e.livro_id) || '';
+            }
+            if (!tituloLivro && e.exemplar_id) {
+              tituloLivro = exemplarToLivroMap.get(e.exemplar_id) || '';
+            }
+            if (!tituloLivro && e.itens?.length) {
+              for (const item of e.itens) {
+                const titulo = exemplarToLivroMap.get(item.exemplar_id);
+                if (titulo) { tituloLivro = titulo; break; }
+              }
+            }
+
             return {
               id: e.emprestimo_id,
-              descricao: `Empréstimo #${e.emprestimo_id} — ${e.usuario?.usuario_nome || `Usuário ${e.usuario_id}`}`,
+              descricao: `${nomeUsuario} fez um empréstimo`,
+              subtitulo: tituloLivro ? `📖 ${tituloLivro}` : 'Empréstimo registrado',
               hora: horaStr,
             };
           });
@@ -243,7 +283,7 @@ export default function Dashboard() {
                             </p>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                              Empréstimo registrado
+                              {a.subtitulo}
                             </p>
                           </div>
 
