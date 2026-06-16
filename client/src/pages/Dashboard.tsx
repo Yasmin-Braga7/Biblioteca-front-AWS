@@ -80,15 +80,30 @@ export default function Dashboard() {
 
           // Recent activity
           const recentes = emprestimosData.value.slice(0, 5).map((e) => {
-            let horaStr = 'agora mesmo';
+            let horaStr = '—';
             if (e.emprestimo_data_emprestimo) {
-              const diffMs = new Date().getTime() - new Date(e.emprestimo_data_emprestimo).getTime();
-              const diffMin = Math.floor(diffMs / 60000);
-              const diffHr = Math.floor(diffMin / 60);
-              const diffDay = Math.floor(diffHr / 24);
-              if (diffDay > 0) horaStr = `há ${diffDay} d`;
-              else if (diffHr > 0) horaStr = `há ${diffHr} h`;
-              else if (diffMin > 0) horaStr = `há ${diffMin} min`;
+              const d = new Date(e.emprestimo_data_emprestimo);
+              // O banco retorna sempre meia-noite UTC para colunas do tipo Date
+              const anoEmp = d.getUTCFullYear();
+              const mesEmp = d.getUTCMonth();
+              const diaEmp = d.getUTCDate();
+              
+              const hoje = new Date();
+              const anoHoje = hoje.getFullYear();
+              const mesHoje = hoje.getMonth();
+              const diaHoje = hoje.getDate();
+              
+              if (anoEmp === anoHoje && mesEmp === mesHoje && diaEmp === diaHoje) {
+                horaStr = 'Hoje';
+              } else {
+                const dataLimpa = new Date(anoEmp, mesEmp, diaEmp);
+                const hojeLimpa = new Date(anoHoje, mesHoje, diaHoje);
+                const diffMs = hojeLimpa.getTime() - dataLimpa.getTime();
+                const diffDay = Math.round(diffMs / (1000 * 60 * 60 * 24));
+                
+                if (diffDay === 1) horaStr = 'Ontem';
+                else if (diffDay > 1) horaStr = `há ${diffDay} dias`;
+              }
             }
             return {
               id: e.emprestimo_id,
