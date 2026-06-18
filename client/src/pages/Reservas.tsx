@@ -4,6 +4,14 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { reservas as api, Reserva } from '@/services/api';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 function statusBadge(s: string) {
   if (s === 'Ativa') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
@@ -18,17 +26,24 @@ export default function Reservas() {
   const [data, setData] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Modal State
+  const [modalAberto, setModalAberto] = useState(false);
+  const [livroId, setLivroId] = useState('');
+  const [usuarioId, setUsuarioId] = useState('');
+  const [salvando, setSalvando] = useState(false);
+
+  const carregarReservas = () => {
+    setLoading(true);
     api.listarAtivas()
       .then(setData)
       .catch((err: any) => {
-        toast.error(
-          err?.response?.data?.message ||
-          err?.message ||
-          'Erro ao carregar reservas'
-        );
+        toast.error(err?.response?.data?.message || err?.message || 'Erro ao carregar reservas');
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    carregarReservas();
   }, []);
 
   const handleCancelar = async (r: Reserva) => {
@@ -54,6 +69,31 @@ export default function Reservas() {
     }
   };
 
+  const handleCriarReserva = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!livroId) return toast.error('Informe o ID do livro');
+    
+    const targetUsuarioId = isAdmin ? usuarioId : usuario?.usuario_id;
+    if (!targetUsuarioId) return toast.error('ID do usuário não disponível');
+
+    try {
+      setSalvando(true);
+      await api.criar({
+        livro_id: Number(livroId),
+        usuario_id: Number(targetUsuarioId)
+      });
+      toast.success('Reserva criada com sucesso!');
+      setModalAberto(false);
+      setLivroId('');
+      setUsuarioId('');
+      carregarReservas();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Erro ao criar reserva');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
   // Filtragem Mágica do BabyShark:
   const reservasVisiveis = isAdmin
     ? data
@@ -72,7 +112,10 @@ export default function Reservas() {
               {isAdmin ? 'Gerenciar reservas de livros' : 'Acompanhe seus livros reservados'}
             </p>
           </div>
-          <button className="sgb-btn-primary flex items-center gap-2">
+          <button 
+            className="sgb-btn-primary flex items-center gap-2"
+            onClick={() => setModalAberto(true)}
+          >
             <Plus className="w-4 h-4" />
             Nova Reserva
           </button>
@@ -149,6 +192,63 @@ export default function Reservas() {
           </div>
         )}
       </div>
+
+      <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nova Reserva</DialogTitle>
+            <DialogDescription>
+              Preencha os dados abaixo para reservar um livro na fila de espera.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCriarReserva} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">ID do Livro</label>
+              <input
+                type="number"
+                required
+                className="sgb-input w-full"
+                placeholder="Ex: 12"
+                value={livroId}
+                onChange={e => setLivroId(e.target.value)}
+              />
+            </div>
+
+            {isAdmin && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">ID do Usuário</label>
+                <input
+                  type="number"
+                  required
+                  className="sgb-input w-full"
+                  placeholder="Ex: 5"
+                  value={usuarioId}
+                  onChange={e => setUsuarioId(e.target.value)}
+                />
+              </div>
+            )}
+
+            <DialogFooter>
+              <button
+                type="button"
+                className="sgb-btn-secondary"
+                onClick={() => setModalAberto(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="sgb-btn-primary flex items-center gap-2"
+                disabled={salvando}
+              >
+                {salvando && <Loader2 className="w-4 h-4 animate-spin" />}
+                Confirmar
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
