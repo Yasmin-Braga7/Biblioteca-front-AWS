@@ -21,7 +21,13 @@ export default function Reservas() {
   useEffect(() => {
     api.listarAtivas()
       .then(setData)
-      .catch(() => toast.error('Erro ao carregar reservas'))
+      .catch((err: any) => {
+        toast.error(
+          err?.response?.data?.message ||
+          err?.message ||
+          'Erro ao carregar reservas'
+        );
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,16 +35,28 @@ export default function Reservas() {
     if (!confirm('Cancelar esta reserva?')) return;
     try {
       await api.cancelar(r.reserva_id);
-      setData((prev) => prev.map((x) => x.reserva_id === r.reserva_id ? { ...x, reserva_status: 'Cancelada' } : x));
+
+      setData((prev) =>
+        prev.map((x) =>
+          x.reserva_id === r.reserva_id
+            ? { ...x, reserva_status: 'Cancelada' }
+            : x
+        )
+      );
+
       toast.success('Reserva cancelada');
-    } catch {
-      toast.error('Erro ao cancelar reserva');
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Erro ao cancelar reserva'
+      );
     }
   };
 
   // Filtragem Mágica do BabyShark:
-  const reservasVisiveis = isAdmin 
-    ? data 
+  const reservasVisiveis = isAdmin
+    ? data
     : data.filter((r) => r.usuario_id === usuario?.usuario_id);
 
   return (

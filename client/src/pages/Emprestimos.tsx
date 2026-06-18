@@ -148,265 +148,271 @@ export default function Emprestimos() {
       setIsCreating(false);
       toast.success('Empréstimo criado com sucesso!');
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.response?.data?.message || 'Erro ao criar empréstimo';
+      const apiError = err?.response?.data?.error;
+
+      const msg =
+        typeof apiError === 'object'
+          ? apiError.message
+          : apiError ||
+          err?.response?.data?.message ||
+          'Erro ao criar empréstimo';
+
       toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const pedirDevolucao = (e: Emprestimo) => {
-    setDevolverTarget(e);
-    setDevolverDialog(true);
-  };
+const pedirDevolucao = (e: Emprestimo) => {
+  setDevolverTarget(e);
+  setDevolverDialog(true);
+};
 
-  const confirmarDevolucao = async () => {
-    if (!devolverTarget) return;
-    setDevolvendo(true);
-    try {
-      const result = await api.devolver(devolverTarget.emprestimo_id);
-      const isAtrasado = Boolean(result.devolucao_possui_multa) || result.houve_atraso;
-      const novoStatus = isAtrasado ? 'Atrasado' : 'Devolvido';
-      const valorMulta = result.multa?.multa_valor || result.valorMulta;
+const confirmarDevolucao = async () => {
+  if (!devolverTarget) return;
+  setDevolvendo(true);
+  try {
+    const result = await api.devolver(devolverTarget.emprestimo_id);
+    const isAtrasado = Boolean(result.devolucao_possui_multa) || result.houve_atraso;
+    const novoStatus = isAtrasado ? 'Atrasado' : 'Devolvido';
+    const valorMulta = result.multa?.multa_valor || result.valorMulta;
 
-      setData((prev) =>
-        prev.map((x) =>
-          x.emprestimo_id === devolverTarget.emprestimo_id
-            ? { ...x, emprestimo_status: novoStatus, emprestimo_multa_valor: valorMulta }
-            : x,
-        ),
-      );
+    setData((prev) =>
+      prev.map((x) =>
+        x.emprestimo_id === devolverTarget.emprestimo_id
+          ? { ...x, emprestimo_status: novoStatus, emprestimo_multa_valor: valorMulta }
+          : x,
+      ),
+    );
 
-      if (isAtrasado) {
-        toast.error(`Devolução com atraso! Multa gerada: R$ ${Number(valorMulta).toFixed(2).replace('.', ',')}`, {
-          duration: 6000,
-        });
-      } else {
-        toast.success('Devolução registrada com sucesso no prazo!');
-      }
-      setDevolverDialog(false);
-    } catch {
-      toast.error('Erro ao registrar devolução');
-    } finally {
-      setDevolvendo(false);
+    if (isAtrasado) {
+      toast.error(`Devolução com atraso! Multa gerada: R$ ${Number(valorMulta).toFixed(2).replace('.', ',')}`, {
+        duration: 6000,
+      });
+    } else {
+      toast.success('Devolução registrada com sucesso no prazo!');
     }
-  };
+    setDevolverDialog(false);
+  } catch {
+    toast.error('Erro ao registrar devolução');
+  } finally {
+    setDevolvendo(false);
+  }
+};
 
-  // Filtragem Mágica do BabyShark: Se não for admin, vê apenas os PRÓPRIOS empréstimos
-  const emprestimosVisiveis = isAdmin 
-    ? data 
-    : data.filter((e) => e.usuario_id === usuario?.usuario_id);
+// Filtragem Mágica do BabyShark: Se não for admin, vê apenas os PRÓPRIOS empréstimos
+const emprestimosVisiveis = isAdmin
+  ? data
+  : data.filter((e) => e.usuario_id === usuario?.usuario_id);
 
-  const ativos = emprestimosVisiveis.filter((e) => e.emprestimo_status === 'Ativo');
-  const atrasados = emprestimosVisiveis.filter((e) => e.emprestimo_status === 'Atrasado');
+const ativos = emprestimosVisiveis.filter((e) => e.emprestimo_status === 'Ativo');
+const atrasados = emprestimosVisiveis.filter((e) => e.emprestimo_status === 'Atrasado');
 
-  return (
-    <DashboardLayout>
-      <div className="space-y-6 page-enter">
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-            {isAdmin ? 'Gestão de Empréstimos e Devoluções' : 'Meus Empréstimos'}
-          </h1>
-        </div>
+return (
+  <DashboardLayout>
+    <div className="space-y-6 page-enter">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          {isAdmin ? 'Gestão de Empréstimos e Devoluções' : 'Meus Empréstimos'}
+        </h1>
+      </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-bottom-2 duration-500">
-          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-emerald-500">
-            <div className="p-3 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg shadow-sm">
-              <RotateCcw className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">No Prazo</p>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{ativos.length}</h3>
-            </div>
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-bottom-2 duration-500">
+        <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-emerald-500">
+          <div className="p-3 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg shadow-sm">
+            <RotateCcw className="w-6 h-6" />
           </div>
-          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-rose-500">
-            <div className="p-3 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg shadow-sm">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Atrasados</p>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{atrasados.length}</h3>
-            </div>
-          </div>
-          <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-blue-500">
-            <div className="p-3 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg shadow-sm">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Histórico</p>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{emprestimosVisiveis.length}</h3>
-            </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">No Prazo</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{ativos.length}</h3>
           </div>
         </div>
-
-        {/* Tabs - Escondidas para o Leitor */}
-        {isAdmin && (
-          <div className="flex space-x-2 border-b border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => { setActiveTab('novo'); setIsCreating(false); }}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === 'novo'
-                  ? 'border-primary text-primary dark:text-rose-400 dark:border-rose-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-            >
-              Registrar Nova Retirada
-            </button>
-            <button
-              onClick={() => setActiveTab('ativos')}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === 'ativos'
-                  ? 'border-primary text-primary dark:text-rose-400 dark:border-rose-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-            >
-              Processar Devolução ({ativos.length + atrasados.length})
-            </button>
+        <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-rose-500">
+          <div className="p-3 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg shadow-sm">
+            <AlertTriangle className="w-6 h-6" />
           </div>
-        )}
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Atrasados</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{atrasados.length}</h3>
+          </div>
+        </div>
+        <div className="glass-card p-5 flex items-center gap-4 border-l-4 border-blue-500">
+          <div className="p-3 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg shadow-sm">
+            <Calendar className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Histórico</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{emprestimosVisiveis.length}</h3>
+          </div>
+        </div>
+      </div>
 
-        {/* Tab: Nova Retirada (Apenas Admin) */}
-        {activeTab === 'novo' && isAdmin && (
-          <div className="glass-card p-8 w-full animate-in zoom-in-95 duration-300">
-            {!isCreating ? (
-              <div className="flex flex-col items-center text-center space-y-6 py-12">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner mb-2 ring-1 ring-primary/20">
-                  <Plus className="w-12 h-12" />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-                    Registrar Novo Empréstimo
-                  </h2>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg">
-                    Inicie o processo de retirada selecionando um leitor e um livro disponível no catálogo.
-                  </p>
-                </div>
-                <button 
-                  onClick={iniciarCriacao} 
-                  className="sgb-btn-primary mt-4 px-8 py-4 text-lg font-semibold flex items-center gap-3 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1 rounded-xl"
-                >
-                  <Plus className="w-6 h-6" />
-                  Iniciar Empréstimo
-                </button>
+      {/* Tabs - Escondidas para o Leitor */}
+      {isAdmin && (
+        <div className="flex space-x-2 border-b border-slate-200 dark:border-slate-700">
+          <button
+            onClick={() => { setActiveTab('novo'); setIsCreating(false); }}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${activeTab === 'novo'
+              ? 'border-primary text-primary dark:text-rose-400 dark:border-rose-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+          >
+            Registrar Nova Retirada
+          </button>
+          <button
+            onClick={() => setActiveTab('ativos')}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${activeTab === 'ativos'
+              ? 'border-primary text-primary dark:text-rose-400 dark:border-rose-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+          >
+            Processar Devolução ({ativos.length + atrasados.length})
+          </button>
+        </div>
+      )}
+
+      {/* Tab: Nova Retirada (Apenas Admin) */}
+      {activeTab === 'novo' && isAdmin && (
+        <div className="glass-card p-8 w-full animate-in zoom-in-95 duration-300">
+          {!isCreating ? (
+            <div className="flex flex-col items-center text-center space-y-6 py-12">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner mb-2 ring-1 ring-primary/20">
+                <Plus className="w-12 h-12" />
               </div>
-            ) : (
-              <div className="max-w-2xl mx-auto py-4 animate-in slide-in-from-bottom-4 duration-300">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Novo Empréstimo</h2>
-                  <p className="text-slate-500 dark:text-slate-400">
-                    Selecione o usuário e livro para registrar um novo empréstimo. Um exemplar disponível será selecionado automaticamente.
-                  </p>
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                  Registrar Novo Empréstimo
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg">
+                  Inicie o processo de retirada selecionando um leitor e um livro disponível no catálogo.
+                </p>
+              </div>
+              <button
+                onClick={iniciarCriacao}
+                className="sgb-btn-primary mt-4 px-8 py-4 text-lg font-semibold flex items-center gap-3 shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1 rounded-xl"
+              >
+                <Plus className="w-6 h-6" />
+                Iniciar Empréstimo
+              </button>
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto py-4 animate-in slide-in-from-bottom-4 duration-300">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Novo Empréstimo</h2>
+                <p className="text-slate-500 dark:text-slate-400">
+                  Selecione o usuário e livro para registrar um novo empréstimo. Um exemplar disponível será selecionado automaticamente.
+                </p>
+              </div>
+
+              {loadingModal ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
-
-                {loadingModal ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="select-usuario">Usuário</Label>
-                      <Select value={selectedUsuario} onValueChange={setSelectedUsuario}>
-                        <SelectTrigger id="select-usuario" className="w-full">
-                          <SelectValue placeholder="Selecione um usuário" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {usuariosList.length === 0 ? (
-                            <SelectItem value="_empty" disabled>Nenhum usuário ativo encontrado</SelectItem>
-                          ) : (
-                            usuariosList.map((u) => (
-                              <SelectItem key={u.usuario_id} value={String(u.usuario_id)}>
-                                {u.usuario_nome} — {u.usuario_email}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="select-livro">Livro</Label>
-                      <Select value={selectedLivro} onValueChange={handleLivroChange}>
-                        <SelectTrigger id="select-livro" className="w-full">
-                          <SelectValue placeholder="Selecione um livro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {livrosList.length === 0 ? (
-                            <SelectItem value="_empty" disabled>Nenhum livro ativo encontrado</SelectItem>
-                          ) : (
-                            livrosList.map((l) => (
-                              <SelectItem key={l.id} value={String(l.id)}>
-                                {l.titulo}
-                                {l.autores && l.autores.length > 0 ? ` — ${l.autores.map(a => a.autor.nome).join(', ')}` : ''}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {selectedLivro && !loadingExemplares && (
-                      <div className="text-sm px-1">
-                        {semExemplar ? (
-                          <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
-                            <AlertTriangle className="w-4 h-4" />
-                            Nenhum exemplar disponível para este livro
-                          </span>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="select-usuario">Usuário</Label>
+                    <Select value={selectedUsuario} onValueChange={setSelectedUsuario}>
+                      <SelectTrigger id="select-usuario" className="w-full">
+                        <SelectValue placeholder="Selecione um usuário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {usuariosList.length === 0 ? (
+                          <SelectItem value="_empty" disabled>Nenhum usuário ativo encontrado</SelectItem>
                         ) : (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                            ✓ {exemplaresList.length} exemplar(es) disponível(is) — um será selecionado automaticamente
-                          </span>
+                          usuariosList.map((u) => (
+                            <SelectItem key={u.usuario_id} value={String(u.usuario_id)}>
+                              {u.usuario_nome} — {u.usuario_email}
+                            </SelectItem>
+                          ))
                         )}
-                      </div>
-                    )}
-                    {loadingExemplares && (
-                      <div className="flex items-center gap-2 text-sm text-slate-500 px-1 font-medium">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Verificando exemplares disponíveis...
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="input-data-devolucao">Data de Devolução Prevista</Label>
-                      <Input
-                        id="input-data-devolucao"
-                        type="date"
-                        value={selectedDataDevolucao}
-                        onChange={(e) => setSelectedDataDevolucao(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="w-full"
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-700 mt-8">
-                      <Button variant="outline" onClick={() => setIsCreating(false)} disabled={submitting}>
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={handleCriar}
-                        disabled={submitting || !selectedUsuario || !selectedLivro || !selectedDataDevolucao || semExemplar || exemplaresList.length === 0}
-                      >
-                        {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        Registrar Empréstimo
-                      </Button>
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Tab: Devoluções / Lista de Empréstimos */}
-        {activeTab === 'ativos' && (
-          <div className="glass-card overflow-hidden animate-in slide-in-from-right-4 duration-300">
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
+                  <div className="space-y-2">
+                    <Label htmlFor="select-livro">Livro</Label>
+                    <Select value={selectedLivro} onValueChange={handleLivroChange}>
+                      <SelectTrigger id="select-livro" className="w-full">
+                        <SelectValue placeholder="Selecione um livro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {livrosList.length === 0 ? (
+                          <SelectItem value="_empty" disabled>Nenhum livro ativo encontrado</SelectItem>
+                        ) : (
+                          livrosList.map((l) => (
+                            <SelectItem key={l.id} value={String(l.id)}>
+                              {l.titulo}
+                              {l.autores && l.autores.length > 0 ? ` — ${l.autores.map(a => a.autor.nome).join(', ')}` : ''}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedLivro && !loadingExemplares && (
+                    <div className="text-sm px-1">
+                      {semExemplar ? (
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                          <AlertTriangle className="w-4 h-4" />
+                          Nenhum exemplar disponível para este livro
+                        </span>
+                      ) : (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          ✓ {exemplaresList.length} exemplar(es) disponível(is) — um será selecionado automaticamente
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {loadingExemplares && (
+                    <div className="flex items-center gap-2 text-sm text-slate-500 px-1 font-medium">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Verificando exemplares disponíveis...
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="input-data-devolucao">Data de Devolução Prevista</Label>
+                    <Input
+                      id="input-data-devolucao"
+                      type="date"
+                      value={selectedDataDevolucao}
+                      onChange={(e) => setSelectedDataDevolucao(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-700 mt-8">
+                    <Button variant="outline" onClick={() => setIsCreating(false)} disabled={submitting}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleCriar}
+                      disabled={submitting || !selectedUsuario || !selectedLivro || !selectedDataDevolucao || semExemplar || exemplaresList.length === 0}
+                    >
+                      {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      Registrar Empréstimo
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Devoluções / Lista de Empréstimos */}
+      {activeTab === 'ativos' && (
+        <div className="glass-card overflow-hidden animate-in slide-in-from-right-4 duration-300">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
                 <thead className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
                   <tr>
@@ -440,11 +446,10 @@ export default function Emprestimos() {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit ${
-                              e.emprestimo_status === 'Ativo'
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                            }`}
+                            className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit ${e.emprestimo_status === 'Ativo'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                              : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                              }`}
                           >
                             {e.emprestimo_status === 'Atrasado' && <AlertTriangle className="w-3 h-3" />}
                             {e.emprestimo_status}
@@ -478,38 +483,38 @@ export default function Emprestimos() {
                   )}
                 </tbody>
               </table>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ─── Modais (Ocultos no bloco se não for admin, mas renderizados condicionalmente abaixo) ─────────────────────────────────────── */}
-
-      {isAdmin && (
-        <Dialog open={devolverDialog} onOpenChange={setDevolverDialog}>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Confirmar Devolução</DialogTitle>
-              <DialogDescription>
-                Deseja registrar a devolução do livro{' '}
-                <strong>{devolverTarget?.livro?.livro_titulo ?? `#${devolverTarget?.livro_id}`}</strong>{' '}
-                emprestado para{' '}
-                <strong>{devolverTarget?.usuario?.usuario_nome ?? `ID ${devolverTarget?.usuario_id}`}</strong>?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDevolverDialog(false)} disabled={devolvendo}>
-                Cancelar
-              </Button>
-              <Button onClick={confirmarDevolucao} disabled={devolvendo}>
-                {devolvendo && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Confirmar Devolução
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </div>
+          )}
+        </div>
       )}
-    </DashboardLayout>
-  );
+    </div>
+
+    {/* ─── Modais (Ocultos no bloco se não for admin, mas renderizados condicionalmente abaixo) ─────────────────────────────────────── */}
+
+    {isAdmin && (
+      <Dialog open={devolverDialog} onOpenChange={setDevolverDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirmar Devolução</DialogTitle>
+            <DialogDescription>
+              Deseja registrar a devolução do livro{' '}
+              <strong>{devolverTarget?.livro?.livro_titulo ?? `#${devolverTarget?.livro_id}`}</strong>{' '}
+              emprestado para{' '}
+              <strong>{devolverTarget?.usuario?.usuario_nome ?? `ID ${devolverTarget?.usuario_id}`}</strong>?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDevolverDialog(false)} disabled={devolvendo}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmarDevolucao} disabled={devolvendo}>
+              {devolvendo && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Confirmar Devolução
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )}
+  </DashboardLayout>
+);
 }
