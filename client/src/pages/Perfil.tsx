@@ -55,6 +55,7 @@ export default function Perfil() {
   // modais
   const [modalDados, setModalDados] = useState(false);
   const [modalEndereco, setModalEndereco] = useState(false);
+  const [modalVerEndereco, setModalVerEndereco] = useState(false);
   const [modalTelefone, setModalTelefone] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
@@ -72,7 +73,40 @@ export default function Perfil() {
   const [cep, setCep] = useState('');
 
   const [telefoneNum, setTelefoneNum] = useState('');
-  const [telefoneTipo, setTelefoneTipo] = useState('Celular');
+  const [telefoneTipo, setTelefoneTipo] = useState<'Celular' | 'Residencial' | 'Comercial'>('Celular');
+
+  // ── Regras por tipo ──────────────────────────────────────────────
+  const TELEFONE_CONFIG = {
+    Celular:      { digitos: 11, mascara: '(XX) XXXXX-XXXX', placeholder: '(21) 99999-9999' },
+    Residencial:  { digitos: 10, mascara: '(XX) XXXX-XXXX',  placeholder: '(21) 3333-4444'  },
+    Comercial:    { digitos: 10, mascara: '(XX) XXXX-XXXX',  placeholder: '(21) 3333-4444'  },
+  } as const;
+
+  function aplicarMascara(digits: string, tipo: typeof telefoneTipo): string {
+    const max = TELEFONE_CONFIG[tipo].digitos;
+    const d = digits.slice(0, max);
+    if (tipo === 'Celular') {
+      if (d.length <= 2)  return d.length ? `(${d}` : '';
+      if (d.length <= 7)  return `(${d.slice(0,2)}) ${d.slice(2)}`;
+      return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+    } else {
+      if (d.length <= 2)  return d.length ? `(${d}` : '';
+      if (d.length <= 6)  return `(${d.slice(0,2)}) ${d.slice(2)}`;
+      return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    }
+  }
+
+  function handleTelefoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, '');
+    const max = TELEFONE_CONFIG[telefoneTipo].digitos;
+    setTelefoneNum(aplicarMascara(digits.slice(0, max), telefoneTipo));
+  }
+
+  function handleTipoChange(novoTipo: typeof telefoneTipo) {
+    setTelefoneTipo(novoTipo);
+    const digits = telefoneNum.replace(/\D/g, '');
+    setTelefoneNum(aplicarMascara(digits, novoTipo));
+  }
 
   useEffect(() => {
     if (authUser?.usuario_id) carregarPerfil();
@@ -176,8 +210,10 @@ export default function Perfil() {
   }
 
   function abrirModalTelefone() {
-    setTelefoneNum(limparPadrao(perfil?.telefone?.telefone_numero));
-    setTelefoneTipo(perfil?.telefone?.telefone_tipo || 'Celular');
+    const num = limparPadrao(perfil?.telefone?.telefone_numero);
+    const tipo = (perfil?.telefone?.telefone_tipo || 'Celular') as 'Celular' | 'Residencial' | 'Comercial';
+    setTelefoneTipo(tipo);
+    setTelefoneNum(aplicarMascara(num.replace(/\D/g, ''), tipo));
     setModalTelefone(true);
   }
 
@@ -375,25 +411,29 @@ export default function Perfil() {
           </div>
 
           {/* ════════ Endereço ════════ */}
-          <div className="glass-card p-6 space-y-5">
+          <div 
+            className="glass-card p-6 space-y-5 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
+            onClick={() => setModalVerEndereco(true)}
+            title="Ver endereço completo"
+          >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary" />
                 Endereço
               </h2>
-              <button onClick={abrirModalEndereco} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors" title="Editar">
+              <button 
+                onClick={(e) => { e.stopPropagation(); abrirModalEndereco(); }} 
+                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors" 
+                title="Editar"
+              >
                 <Pencil className="w-4 h-4" />
               </button>
             </div>
             {perfil?.endereco ? (
-              <div className="space-y-4">
+              <div className="space-y-4 pointer-events-none">
                 <InfoRow icon={<MapPin className="w-4 h-4" />} label="Rua" value={`${exibir(perfil.endereco.endereco_rua)}${exibir(perfil.endereco.endereco_numero) !== '—' ? `, ${exibir(perfil.endereco.endereco_numero)}` : ''}`} />
-                {perfil.endereco.endereco_complemento && !VALORES_PADRAO.includes(perfil.endereco.endereco_complemento) && (
-                  <InfoRow icon={<Building2 className="w-4 h-4" />} label="Complemento" value={perfil.endereco.endereco_complemento} />
-                )}
                 <InfoRow icon={<Building2 className="w-4 h-4" />} label="Bairro" value={exibir(perfil.endereco.endereco_bairro)} />
                 <InfoRow icon={<MapPin className="w-4 h-4" />} label="Cidade / Estado" value={exibir(perfil.endereco.endereco_cidade) !== '—' ? `${exibir(perfil.endereco.endereco_cidade)} - ${exibir(perfil.endereco.endereco_estado)}` : '—'} />
-                <InfoRow icon={<Mail className="w-4 h-4" />} label="CEP" value={exibir(perfil.endereco.endereco_cep)} />
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Endereço não cadastrado.</p>
@@ -547,14 +587,89 @@ export default function Perfil() {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <ModalField label="Número" value={telefoneNum} onChange={setTelefoneNum} placeholder="(21) 99999-9999" />
             <div>
-              <label className="sgb-label">Tipo</label>
-              <select value={telefoneTipo} onChange={(e) => setTelefoneTipo(e.target.value)} className="sgb-input">
-                <option value="Celular">Celular</option>
-                <option value="Residencial">Residencial</option>
-                <option value="Comercial">Comercial</option>
-              </select>
+              <label className="sgb-label mb-2 block">Tipo</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    {
+                      tipo: 'Celular',
+                      label: 'Celular',
+                      sub: '9 dígitos',
+                      icon: (
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                          <rect x="7" y="2" width="10" height="20" rx="2"/>
+                          <circle cx="12" cy="17.5" r="0.8" fill="currentColor"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      tipo: 'Residencial',
+                      label: 'Residencial',
+                      sub: '8 dígitos',
+                      icon: (
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+                          <path d="M9 21V12h6v9"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      tipo: 'Comercial',
+                      label: 'Comercial',
+                      sub: '8 dígitos',
+                      icon: (
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                          <rect x="2" y="7" width="20" height="14" rx="1"/>
+                          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+                          <line x1="12" y1="12" x2="12" y2="16"/>
+                          <line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
+                      ),
+                    },
+                  ] as const
+                ).map(({ tipo, label, sub, icon }) => (
+                  <button
+                    key={tipo}
+                    type="button"
+                    onClick={() => handleTipoChange(tipo)}
+                    className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 font-semibold text-xs transition-all ${
+                      telefoneTipo === tipo
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
+                    }`}
+                  >
+                    {icon}
+                    <span className="text-[11px] font-bold">{label}</span>
+                    <span className={`text-[10px] ${telefoneTipo === tipo ? 'text-primary/70' : 'text-muted-foreground'}`}>
+                      {sub}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="sgb-label">
+                Número <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  value={telefoneNum}
+                  onChange={handleTelefoneChange}
+                  placeholder={TELEFONE_CONFIG[telefoneTipo].placeholder}
+                  maxLength={telefoneTipo === 'Celular' ? 15 : 14}
+                  className="sgb-input pr-16"
+                />
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono tabular-nums ${
+                  telefoneNum.replace(/\D/g, '').length === TELEFONE_CONFIG[telefoneTipo].digitos
+                    ? 'text-green-500'
+                    : 'text-muted-foreground'
+                }`}>
+                  {telefoneNum.replace(/\D/g, '').length}/{TELEFONE_CONFIG[telefoneTipo].digitos}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -565,6 +680,41 @@ export default function Perfil() {
             <button onClick={salvarTelefone} disabled={salvando} className="sgb-btn-primary flex items-center gap-2 text-sm">
               {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Salvar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* ─── MODAL: Ver Endereço Completo ──────────────────────────────────── */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <Dialog open={modalVerEndereco} onOpenChange={setModalVerEndereco}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Endereço Completo
+            </DialogTitle>
+            <DialogDescription>Detalhes do seu endereço cadastrado.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+            {perfil?.endereco ? (
+              <>
+                <InfoRow icon={<MapPin className="w-4 h-4" />} label="Rua / Número" value={`${exibir(perfil.endereco.endereco_rua)}${exibir(perfil.endereco.endereco_numero) !== '—' ? `, ${exibir(perfil.endereco.endereco_numero)}` : ''}`} />
+                <InfoRow icon={<Building2 className="w-4 h-4" />} label="Complemento" value={exibir(perfil.endereco.endereco_complemento)} />
+                <InfoRow icon={<Building2 className="w-4 h-4" />} label="Bairro" value={exibir(perfil.endereco.endereco_bairro)} />
+                <InfoRow icon={<MapPin className="w-4 h-4" />} label="Cidade / Estado" value={exibir(perfil.endereco.endereco_cidade) !== '—' ? `${exibir(perfil.endereco.endereco_cidade)} - ${exibir(perfil.endereco.endereco_estado)}` : '—'} />
+                <InfoRow icon={<Mail className="w-4 h-4" />} label="CEP" value={exibir(perfil.endereco.endereco_cep)} />
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">Nenhum endereço cadastrado.</p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <button onClick={() => setModalVerEndereco(false)} className="sgb-btn-secondary text-sm w-full">
+              Fechar
             </button>
           </DialogFooter>
         </DialogContent>

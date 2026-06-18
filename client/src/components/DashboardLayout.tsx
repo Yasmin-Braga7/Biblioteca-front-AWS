@@ -28,6 +28,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { logout, usuario, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [fotoError, setFotoError] = useState(false);
 
   const allNavItems = [
     { href: '/', label: 'Dashboard', icon: Home, adminOnly: true },
@@ -104,15 +105,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   className="hidden md:flex items-center gap-2.5 pl-3 ml-1 border-l border-slate-200 dark:border-slate-700 hover:opacity-80 transition-opacity"
                 >
                   <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold shadow-sm overflow-hidden">
-                    <img
-                      src={`${usuarios.getFotoUrl(usuario.usuario_id)}?t=${Date.now()}`}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.textContent = initials;
-                      }}
-                    />
+                    {!fotoError ? (
+                      <img
+                        src={`${usuarios.getFotoUrl(usuario.usuario_id)}?t=${Date.now()}`}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={() => setFotoError(true)}
+                      />
+                    ) : (
+                      <span>{initials}</span>
+                    )}
                   </div>
                   <div className="hidden lg:block">
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-none">
@@ -184,15 +186,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {usuario && (
                 <div className="flex items-center gap-3 mb-3 px-4">
                   <div className="w-9 h-9 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold overflow-hidden">
-                    <img
-                      src={`${usuarios.getFotoUrl(usuario.usuario_id)}?t=${Date.now()}`}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.textContent = initials;
-                      }}
-                    />
+                    {!fotoError ? (
+                      <img
+                        src={`${usuarios.getFotoUrl(usuario.usuario_id)}?t=${Date.now()}`}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={() => setFotoError(true)}
+                      />
+                    ) : (
+                      <span>{initials}</span>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">

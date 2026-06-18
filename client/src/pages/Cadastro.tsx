@@ -126,19 +126,19 @@ export default function Cadastro() {
       </div>
 
       {/* ─── FORMULÁRIO ─── */}
-      <div className="relative z-30 w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7)] overflow-hidden border border-white/30">
-        <div className="bg-primary p-8 text-center border-b border-black/5">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md shadow-inner ring-2 ring-white/40">
-            <BookOpen className="w-8 h-8 text-white" />
+      <div className={`relative z-30 w-full ${novoUsuarioId ? 'max-w-lg' : 'max-w-md'} bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7)] overflow-hidden border border-white/30`}>
+        <div className={`bg-primary text-center border-b border-black/5 ${novoUsuarioId ? 'p-6' : 'p-8'}`}>
+          <div className={`bg-white/20 rounded-full flex items-center justify-center mx-auto backdrop-blur-md shadow-inner ring-2 ring-white/40 ${novoUsuarioId ? 'w-14 h-14 mb-3' : 'w-16 h-16 mb-4'}`}>
+            <BookOpen className={novoUsuarioId ? 'w-7 h-7 text-white' : 'w-8 h-8 text-white'} />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className={`font-bold text-white ${novoUsuarioId ? 'text-2xl mb-1' : 'text-3xl mb-2'}`}>
             {novoUsuarioId ? 'Complete seu perfil' : 'Cadastro'}
           </h1>
           {novoUsuarioId && (
             <p className="text-white/70 text-sm">Preencha seus dados para começar</p>
           )}
         </div>
-        <div className="p-8">
+        <div className={novoUsuarioId ? 'p-6' : 'p-8'}>
           {novoUsuarioId ? (
             /* ─── Formulário de completar perfil (pós-cadastro) ─── */
             <CompletarPerfil usuarioId={novoUsuarioId} />
