@@ -432,23 +432,23 @@ export const reservas = {
 
 export const relatorios = {
   dashboardKpis: async (): Promise<DashboardKpis> => {
-    const { data } = await clientRelatorio.get('/reservas/dashboard/kpis');
+    const { data } = await clientRelatorio.get('/relatorios/dashboard/kpis');
     return data.data ?? data;
   },
   totalMultas: async () => {
-    const { data } = await clientRelatorio.get('/reservas/financeiro/multas-total');
+    const { data } = await clientRelatorio.get('/relatorios/financeiro/multas-total');
     return data.data ?? data;
   },
   topLivros: async () => {
-    const { data } = await clientRelatorio.get('/reservas/livros/top');
+    const { data } = await clientRelatorio.get('/relatorios/livros/top');
     return data.data ?? data;
   },
   usuariosInadimplentes: async () => {
-    const { data } = await clientRelatorio.get('/reservas/usuarios/inadimplentes');
+    const { data } = await clientRelatorio.get('/relatorios/usuarios/inadimplentes');
     return data.data ?? data;
   },
   exportarCSV: async () => {
-    const response = await clientRelatorio.get('/reservas/exportar/csv', { responseType: 'blob' });
+    const response = await clientRelatorio.get('/relatorios/exportar/csv', { responseType: 'blob' });
     return response.data;
   },
 };

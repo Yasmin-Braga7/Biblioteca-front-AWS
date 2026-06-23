@@ -54,7 +54,7 @@ export default defineConfig({
         rewrite: (p) => p.replace(/^\/20261prj5\/biblioteca\/api\/reserva/, ""),
       },
       "/20261prj5/biblioteca/api/relatorio": {
-        target: process.env.VITE_URL_RELATORIO || "http://localhost:9504",
+        target: process.env.VITE_URL_RELATORIO || "http://localhost:9500",
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/20261prj5\/biblioteca\/api\/relatorio/, ""),
       },
