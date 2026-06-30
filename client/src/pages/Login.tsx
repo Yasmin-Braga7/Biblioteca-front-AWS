@@ -51,8 +51,12 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, senha);
-      navigate('/');
+      const user = await login(email, senha);
+      if (user?.usuario_tipo === 'Bibliotecario') {
+        navigate('/');
+      } else {
+        navigate('/catalogo');
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Credenciais inválidas');
     } finally {

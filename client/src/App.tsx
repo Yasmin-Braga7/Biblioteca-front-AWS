@@ -17,8 +17,16 @@ import Cadastro from "./pages/Cadastro"; // Importando a nova página de cadastr
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
+function RedirectToCatalogo() {
+  const [, navigate] = useLocation();
+  useEffect(() => {
+    navigate('/catalogo', { replace: true });
+  }, [navigate]);
+  return null;
+}
+
 function ProtectedRoutes() {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, isAdmin } = useAuth();
   const [location, navigate] = useLocation();
 
   useEffect(() => {
@@ -40,7 +48,7 @@ function ProtectedRoutes() {
 
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={isAdmin ? Dashboard : RedirectToCatalogo} />
       <Route path="/catalogo" component={Catalogo} />
       <Route path="/emprestimos" component={Emprestimos} />
       <Route path="/reservas" component={Reservas} />

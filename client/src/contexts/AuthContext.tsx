@@ -7,7 +7,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, senha: string) => Promise<void>;
+  login: (email: string, senha: string) => Promise<Usuario>;
   logout: () => void;
   isAdmin: boolean;
   isLoading: boolean;
@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', token);
     localStorage.setItem('usuario', JSON.stringify(usuario));
     setState({ token, usuario });
+    return usuario;
   };
 
   const logout = () => {

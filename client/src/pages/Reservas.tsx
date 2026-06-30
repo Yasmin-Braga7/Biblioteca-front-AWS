@@ -182,7 +182,7 @@ export default function Reservas() {
 
                 {/* Footer */}
                 <div className="bg-slate-50 dark:bg-slate-800/30 px-6 py-3 border-t border-slate-100 dark:border-slate-700 flex justify-between">
-                  {(r.reserva_status === 'Ativa' || r.reserva_status === 1) ? (
+                  {(r.reserva_status === 'Ativa' || (r.reserva_status as any) === 1) ? (
                     <button
                       onClick={() => handleCancelar(r)}
                       className="text-slate-500 hover:text-rose-600 text-sm font-medium transition-colors"
