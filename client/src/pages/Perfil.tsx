@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usuarios } from '@/services/api';
 import ImageCropper from '@/components/ui/ImageCropper';
 import DashboardLayout from '@/components/DashboardLayout';
+import { FotoUsuario } from "@/components/FotoUsuario";
 import {
   Dialog,
   DialogContent,
@@ -337,17 +338,13 @@ export default function Perfil() {
               {/* Avatar com upload */}
               <div className="relative group">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-secondary flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02]">
-                  {!fotoError ? (
-                    <img
-                      key={fotoKey}
-                      src={`${fotoUrl}?t=${fotoKey}`}
-                      alt="Foto de perfil"
-                      className="w-full h-full object-cover"
-                      onError={() => setFotoError(true)}
-                    />
-                  ) : (
-                    <span className="text-3xl sm:text-4xl font-bold text-white select-none">{initials}</span>
-                  )}
+              <FotoUsuario
+                usuarioId={authUser!.usuario_id}
+                refreshKey={fotoKey}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+                fallback={<span className="text-3xl sm:text-4xl font-bold text-white select-none">{initials}</span>}
+              />
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}

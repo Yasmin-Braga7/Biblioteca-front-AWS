@@ -252,6 +252,12 @@ export const usuarios = {
   getFotoUrl: (id: number): string => {
     return `${BASE.usuario}/usuarios/${id}/foto`;
   },
+  getFoto: async (id: number): Promise<string> => {
+    const { data } = await clientUsuario.get(`/usuarios/${id}/foto`, {
+      responseType: "blob",
+    });
+    return URL.createObjectURL(data);
+  },
 };
 
 // ─── CATÁLOGO — LIVROS ────────────────────────────────────────────────────────

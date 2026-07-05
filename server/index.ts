@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ─── Base path — mesmo valor de vite.config.ts (base) ──────────────────────
-const BASE_PATH = "/20261prj5/biblioteca";
+const BASE_PATH = "";
 
 // Endereços dos microsserviços (mesmos do .env.example)
 // Em produção no Senac, os backends rodam localmente nas portas abaixo.
