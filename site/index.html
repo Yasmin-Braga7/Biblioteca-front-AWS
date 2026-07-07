@@ -3,105 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Biblioteca - Microsserviços</title>
+    <title>Sistema de Biblioteca — Arquitetura de Microsserviços</title>
+    <meta name="description" content="Plataforma web para gestão de acervo, usuários, empréstimos e reservas, construída com arquitetura de microsserviços na AWS.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📚 Sistema de Biblioteca</h1>
-            <p>Plataforma web para gestão de acervo, usuários, empréstimos e reservas.</p>
-        </header>
 
-        <main class="content">
-            <section class="info-section">
-                <h2>Sobre o Projeto</h2>
-                <p>
-                    Este projeto foi desenvolvido utilizando uma <strong>Arquitetura de Microsserviços</strong>. 
-                    Em vez de um sistema monolítico, a aplicação foi dividida em serviços menores e independentes, 
-                    como os microsserviços de <strong>Usuários</strong> e <strong>Empréstimos</strong> (entre outros), 
-                    que se comunicam de forma eficiente. Isso garante maior escalabilidade, resiliência e facilidade na manutenção do código.
+    <div class="bg-decor" aria-hidden="true"></div>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <nav class="navbar">
+            <span class="brand"><span class="brand-icon">📚</span> Biblioteca<span class="brand-accent">.digital</span></span>
+            <ul class="nav-links">
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#arquitetura">Arquitetura</a></li>
+                <li><a href="#interface">Interface</a></li>
+                <li><a href="#equipe">Equipe</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero-content">
+            <p class="eyebrow">Projeto acadêmico &mdash; AWS &amp; Microsserviços</p>
+            <h1>Sistema de Gestão de <span class="highlight">Biblioteca</span></h1>
+            <p class="hero-subtitle">
+                Uma plataforma web completa para administrar acervo, usuários, empréstimos e reservas —
+                construída sobre uma arquitetura de microsserviços moderna, escalável e hospedada na nuvem.
+            </p>
+            <div class="hero-actions">
+                <a href="#interface" class="btn btn-primary">Ver a interface</a>
+                <a href="#arquitetura" class="btn btn-ghost">Conhecer a arquitetura</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ===== SOBRE ===== -->
+        <section id="sobre" class="section">
+            <div class="section-inner">
+                <span class="section-tag">01 — Sobre o projeto</span>
+                <h2>Uma arquitetura pensada para escalar</h2>
+                <p class="lead">
+                    Este projeto foi desenvolvido utilizando uma <strong>Arquitetura de Microsserviços</strong>.
+                    Em vez de um sistema monolítico, a aplicação foi dividida em serviços menores e independentes —
+                    como os microsserviços de <strong>Usuários</strong>, <strong>Catálogo</strong>, <strong>Reservas</strong>,
+                    <strong>Relatórios</strong> e <strong>Empréstimos</strong> — que se comunicam de forma eficiente entre si.
+                    Essa abordagem garante maior escalabilidade, resiliência e facilidade na manutenção do código.
                 </p>
-                
-                <h3>🛠️ Tecnologias Utilizadas</h3>
-                <p>O ecossistema do projeto (Front-end e Back-end) foi construído utilizando:</p>
+
+                <h3>Tecnologias utilizadas</h3>
                 <div class="tech-stack">
-                    <span class="badge">React / Vite</span>
+                    <span class="badge">React 19</span>
+                    <span class="badge">TypeScript</span>
+                    <span class="badge">Vite</span>
+                    <span class="badge">Tailwind CSS</span>
                     <span class="badge">Node.js</span>
                     <span class="badge">Prisma ORM</span>
                     <span class="badge">RabbitMQ</span>
-                    <span class="badge">AWS</span>
                     <span class="badge">Docker</span>
+                    <span class="badge">AWS</span>
+                    <span class="badge">Jenkins</span>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="info-section">
-                <h2>Conheça a Interface</h2>
-                <p>Abaixo você pode conferir as telas do nosso frontend, com visões dedicadas tanto para Administradores quanto para Clientes:</p>
-                
+        <!-- ===== ARQUITETURA ===== -->
+        <section id="arquitetura" class="section section-alt">
+            <div class="section-inner">
+                <span class="section-tag">02 — Arquitetura</span>
+                <h2>Microsserviços integrados</h2>
+                <p class="lead">
+                    Cada domínio do sistema é isolado em seu próprio serviço, com porta e responsabilidade dedicadas,
+                    permitindo deploy e escalonamento independentes.
+                </p>
+
+                <div class="services-grid">
+                    <div class="service-card">
+                        <span class="service-icon">👤</span>
+                        <h4>Usuário</h4>
+                        <p>Cadastro, autenticação e perfis de administradores e clientes.</p>
+                        <code>:9501</code>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">📖</span>
+                        <h4>Catálogo</h4>
+                        <p>Gestão do acervo — livros, autores, gêneros e exemplares.</p>
+                        <code>:9502</code>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">🗓️</span>
+                        <h4>Reserva</h4>
+                        <p>Controle de reservas de exemplares disponíveis no acervo.</p>
+                        <code>:9503</code>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">📊</span>
+                        <h4>Relatório</h4>
+                        <p>Indicadores e relatórios gerenciais para administradores.</p>
+                        <code>:9504</code>
+                    </div>
+                    <div class="service-card">
+                        <span class="service-icon">🔄</span>
+                        <h4>Empréstimo</h4>
+                        <p>Ciclo completo de empréstimo e devolução de exemplares.</p>
+                        <code>:9500</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== INTERFACE / GALERIA ===== -->
+        <section id="interface" class="section">
+            <div class="section-inner">
+                <span class="section-tag">03 — Interface</span>
+                <h2>Conheça a interface</h2>
+                <p class="lead">
+                    Abaixo você pode conferir as telas do frontend, com visões dedicadas tanto para
+                    <strong>Administradores</strong> quanto para <strong>Clientes</strong>.
+                    <span class="hint">🔍 Clique em qualquer imagem para ampliar.</span>
+                </p>
+
                 <div class="gallery">
-                    <!-- Dashboard e Relatórios -->
-                    <figure>
-                        <img src="imagens/dashboard-Admin.png" alt="Dashboard Administrador">
-                        <figcaption>Dashboard (Admin)</figcaption>
+                    <figure data-caption="Dashboard (Admin)">
+                        <img src="imagens/dashboard-Admin.png" alt="Dashboard Administrador" loading="lazy">
+                        <figcaption>Dashboard <span>Admin</span></figcaption>
                     </figure>
-                    <figure>
-                        <img src="imagens/relatorio-Admin.png" alt="Relatórios Administrador">
-                        <figcaption>Relatórios (Admin)</figcaption>
+                    <figure data-caption="Relatórios (Admin)">
+                        <img src="imagens/relatorio-Admin.png" alt="Relatórios Administrador" loading="lazy">
+                        <figcaption>Relatórios <span>Admin</span></figcaption>
                     </figure>
-
-                    <!-- Catálogo -->
-                    <figure>
-                        <img src="imagens/catalogo-Admin.png" alt="Catálogo Administrador">
-                        <figcaption>Catálogo (Admin)</figcaption>
+                    <figure data-caption="Catálogo (Admin)">
+                        <img src="imagens/catalogo-Admin.png" alt="Catálogo Administrador" loading="lazy">
+                        <figcaption>Catálogo <span>Admin</span></figcaption>
                     </figure>
-                    <figure>
-                        <img src="imagens/catalogo-cliente.png" alt="Catálogo Cliente">
-                        <figcaption>Catálogo (Cliente)</figcaption>
+                    <figure data-caption="Catálogo (Cliente)">
+                        <img src="imagens/catalogo-cliente.png" alt="Catálogo Cliente" loading="lazy">
+                        <figcaption>Catálogo <span>Cliente</span></figcaption>
                     </figure>
-
-                    <!-- Empréstimos -->
-                    <figure>
-                        <img src="imagens/emprestimo-Admin.png" alt="Empréstimos Administrador">
-                        <figcaption>Empréstimos (Admin)</figcaption>
+                    <figure data-caption="Empréstimos (Admin)">
+                        <img src="imagens/emprestimo-Admin.png" alt="Empréstimos Administrador" loading="lazy">
+                        <figcaption>Empréstimos <span>Admin</span></figcaption>
                     </figure>
-                    <figure>
-                        <img src="imagens/emprestimo-cliente.png" alt="Empréstimos Cliente">
-                        <figcaption>Meus Empréstimos (Cliente)</figcaption>
+                    <figure data-caption="Meus Empréstimos (Cliente)">
+                        <img src="imagens/emprestimo-cliente.png" alt="Empréstimos Cliente" loading="lazy">
+                        <figcaption>Meus Empréstimos <span>Cliente</span></figcaption>
                     </figure>
-
-                    <!-- Reservas -->
-                    <figure>
-                        <img src="imagens/reserva-Admin.png" alt="Reservas Administrador">
-                        <figcaption>Reservas (Admin)</figcaption>
+                    <figure data-caption="Reservas (Admin)">
+                        <img src="imagens/reserva-Admin.png" alt="Reservas Administrador" loading="lazy">
+                        <figcaption>Reservas <span>Admin</span></figcaption>
                     </figure>
-                    <figure>
-                        <img src="imagens/reserva-cliente.png" alt="Reservas Cliente">
-                        <figcaption>Minhas Reservas (Cliente)</figcaption>
+                    <figure data-caption="Minhas Reservas (Cliente)">
+                        <img src="imagens/reserva-cliente.png" alt="Reservas Cliente" loading="lazy">
+                        <figcaption>Minhas Reservas <span>Cliente</span></figcaption>
                     </figure>
-
-                    <!-- Usuários e Perfil -->
-                    <figure>
-                        <img src="imagens/usuario-Admin.png" alt="Gestão de Usuários Administrador">
-                        <figcaption>Gestão de Usuários (Admin)</figcaption>
+                    <figure data-caption="Gestão de Usuários (Admin)">
+                        <img src="imagens/usuario-Admin.png" alt="Gestão de Usuários Administrador" loading="lazy">
+                        <figcaption>Gestão de Usuários <span>Admin</span></figcaption>
                     </figure>
-                    <figure>
-                        <img src="imagens/perfil.png" alt="Perfil do Usuário">
-                        <figcaption>Perfil do Usuário</figcaption>
+                    <figure data-caption="Perfil do Usuário">
+                        <img src="imagens/perfil.png" alt="Perfil do Usuário" loading="lazy">
+                        <figcaption>Perfil <span>Usuário</span></figcaption>
                     </figure>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="team-section">
+        <!-- ===== EQUIPE ===== -->
+        <section id="equipe" class="section section-alt team-section">
+            <div class="section-inner">
+                <span class="section-tag">04 — Equipe</span>
                 <h2>Desenvolvido por</h2>
                 <ul class="team-list">
-                    <li>Laura</li>
-                    <li>Pablo</li>
-                    <li>Yasmin</li>
-                    <li>Gustavo</li>
+                    <li><span class="avatar">L</span>Laura</li>
+                    <li><span class="avatar">P</span>Pablo</li>
+                    <li><span class="avatar">Y</span>Yasmin</li>
+                    <li><span class="avatar">G</span>Gustavo</li>
                 </ul>
-            </section>
-        </main>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Sistema de Biblioteca &middot; Projeto acadêmico com arquitetura de microsserviços na AWS</p>
+    </footer>
+
+    <!-- ===== LIGHTBOX ===== -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Fechar">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Anterior">&#10094;</button>
+        <img src="" alt="" id="lightboxImg">
+        <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Próxima">&#10095;</button>
+        <p class="lightbox-caption" id="lightboxCaption"></p>
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
