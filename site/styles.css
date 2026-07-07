@@ -1,0 +1,136 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    max-width: 1000px;
+    background: #fff;
+    margin: 40px 20px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #edf2f7;
+}
+
+header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+header p {
+    color: #7f8c8d;
+    font-size: 1.2em;
+}
+
+.info-section {
+    margin-bottom: 45px;
+}
+
+.info-section h2, .team-section h2 {
+    color: #2c3e50;
+    border-left: 5px solid #3498db;
+    padding-left: 12px;
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    color: #34495e;
+    margin-top: 30px;
+}
+
+.info-section p {
+    line-height: 1.7;
+    color: #555;
+    font-size: 1.05em;
+}
+
+.tech-stack {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.badge {
+    background-color: #ebf5fb;
+    color: #2980b9;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: 600;
+    border: 1px solid #d6eaf8;
+}
+
+/* Novo estilo em Grid para as 10 imagens */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+figure {
+    margin: 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+figure:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+figure img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid #ecf0f1;
+}
+
+figcaption {
+    margin-top: 12px;
+    font-weight: 600;
+    color: #34495e;
+    font-size: 0.95em;
+}
+
+.team-section {
+    background-color: #fdfefe;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #eaeded;
+    margin-top: 50px;
+}
+
+.team-list {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    list-style-type: none;
+    padding: 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2c3e50;
+    flex-wrap: wrap;
+}
+
+.team-list li::before {
+    content: "🧑‍💻 ";
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca - Microsserviços</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Sistema de Biblioteca</h1>
+            <p>Plataforma web para gestão de acervo, usuários, empréstimos e reservas.</p>
+        </header>
+
+        <main class="content">
+            <section class="info-section">
+                <h2>Sobre o Projeto</h2>
+                <p>
+                    Este projeto foi desenvolvido utilizando uma <strong>Arquitetura de Microsserviços</strong>. 
+                    Em vez de um sistema monolítico, a aplicação foi dividida em serviços menores e independentes, 
+                    como os microsserviços de <strong>Usuários</strong> e <strong>Empréstimos</strong> (entre outros), 
+                    que se comunicam de forma eficiente. Isso garante maior escalabilidade, resiliência e facilidade na manutenção do código.
+                </p>
+                
+                <h3>🛠️ Tecnologias Utilizadas</h3>
+                <p>O ecossistema do projeto (Front-end e Back-end) foi construído utilizando:</p>
+                <div class="tech-stack">
+                    <span class="badge">React / Vite</span>
+                    <span class="badge">Node.js</span>
+                    <span class="badge">Prisma ORM</span>
+                    <span class="badge">RabbitMQ</span>
+                    <span class="badge">AWS</span>
+                    <span class="badge">Docker</span>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h2>Conheça a Interface</h2>
+                <p>Abaixo você pode conferir as telas do nosso frontend, com visões dedicadas tanto para Administradores quanto para Clientes:</p>
+                
+                <div class="gallery">
+                    <!-- Dashboard e Relatórios -->
+                    <figure>
+                        <img src="imagens/dashboard-Admin.png" alt="Dashboard Administrador">
+                        <figcaption>Dashboard (Admin)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="imagens/relatorio-Admin.png" alt="Relatórios Administrador">
+                        <figcaption>Relatórios (Admin)</figcaption>
+                    </figure>
+
+                    <!-- Catálogo -->
+                    <figure>
+                        <img src="imagens/catalogo-Admin.png" alt="Catálogo Administrador">
+                        <figcaption>Catálogo (Admin)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="imagens/catalogo-cliente.png" alt="Catálogo Cliente">
+                        <figcaption>Catálogo (Cliente)</figcaption>
+                    </figure>
+
+                    <!-- Empréstimos -->
+                    <figure>
+                        <img src="imagens/emprestimo-Admin.png" alt="Empréstimos Administrador">
+                        <figcaption>Empréstimos (Admin)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="imagens/emprestimo-cliente.png" alt="Empréstimos Cliente">
+                        <figcaption>Meus Empréstimos (Cliente)</figcaption>
+                    </figure>
+
+                    <!-- Reservas -->
+                    <figure>
+                        <img src="imagens/reserva-Admin.png" alt="Reservas Administrador">
+                        <figcaption>Reservas (Admin)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="imagens/reserva-cliente.png" alt="Reservas Cliente">
+                        <figcaption>Minhas Reservas (Cliente)</figcaption>
+                    </figure>
+
+                    <!-- Usuários e Perfil -->
+                    <figure>
+                        <img src="imagens/usuario-Admin.png" alt="Gestão de Usuários Administrador">
+                        <figcaption>Gestão de Usuários (Admin)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="imagens/perfil.png" alt="Perfil do Usuário">
+                        <figcaption>Perfil do Usuário</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="team-section">
+                <h2>Desenvolvido por</h2>
+                <ul class="team-list">
+                    <li>Laura</li>
+                    <li>Pablo</li>
+                    <li>Yasmin</li>
+                    <li>Gustavo</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
